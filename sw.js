@@ -1,7 +1,7 @@
 // Offline support: same-origin files are fetched from the network first
 // (so updates show up right away) and fall back to the cache when offline.
 // Requests to other origins (e.g. the GitHub API used for sync) are not touched.
-const CACHE = 'spendings-v2';
+const CACHE = 'spendings-v3';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon.svg', './scriptable-widget.js'];
 
 self.addEventListener('install', (e) => {
