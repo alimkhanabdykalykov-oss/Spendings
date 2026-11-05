@@ -1,6 +1,8 @@
-// Minimal offline cache: serve the app shell from cache, refresh it in the background.
-const CACHE = 'spendings-v1';
-const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon.svg'];
+// Offline support: same-origin files are fetched from the network first
+// (so updates show up right away) and fall back to the cache when offline.
+// Requests to other origins (e.g. the GitHub API used for sync) are not touched.
+const CACHE = 'spendings-v2';
+const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon.svg', './scriptable-widget.js'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
@@ -15,19 +17,17 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  if (e.request.method !== 'GET') return;
+  const req = e.request;
+  if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) return;
   e.respondWith(
-    caches.match(e.request).then((cached) => {
-      const fresh = fetch(e.request)
-        .then((res) => {
-          if (res.ok) {
-            const copy = res.clone();
-            caches.open(CACHE).then((c) => c.put(e.request, copy));
-          }
-          return res;
-        })
-        .catch(() => cached);
-      return cached || fresh;
-    })
+    fetch(req)
+      .then((res) => {
+        if (res.ok) {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(req, copy));
+        }
+        return res;
+      })
+      .catch(() => caches.match(req, { ignoreSearch: true }).then((r) => r || caches.match('./index.html')))
   );
 });

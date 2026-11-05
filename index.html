@@ -220,7 +220,12 @@
   .list .del { width: 32px; height: 32px; border-radius: 8px; border: 0; background: transparent; color: var(--muted); font-size: 16px; }
   .list .del:hover { background: color-mix(in srgb, var(--danger) 14%, transparent); color: var(--danger); }
   .muted { color: var(--muted); font-size: 14px; }
-  .hint { font-size: 13px; color: var(--muted); margin-top: 6px; }
+  .hint { font-size: 13px; color: var(--muted); margin-top: 6px; line-height: 1.45; }
+  .hint a { color: var(--accent); }
+  .sheet h3 { font-size: 15px; margin: 22px 0 8px; }
+  .sheet h3:first-of-type { margin-top: 4px; }
+  .sync-dot { position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; border-radius: 50%; background: var(--danger); }
+  #settingsBtn { position: relative; }
 
   .toast {
     position: fixed; left: 50%; bottom: calc(90px + env(safe-area-inset-bottom)); transform: translateX(-50%) translateY(20px);
@@ -320,9 +325,29 @@
 <!-- Settings -->
 <dialog id="setDlg">
   <div class="sheet">
-    <h2>Данные<button type="button" class="icon-btn x" data-close>✕</button></h2>
-    <p class="muted" style="margin-top:0">Все данные хранятся только в этом браузере. Сделайте резервную копию, чтобы перенести их на другое устройство.</p>
-    <div class="actions" style="flex-direction:column">
+    <h2>Настройки<button type="button" class="icon-btn x" data-close>✕</button></h2>
+
+    <h3>Синхронизация и виджет</h3>
+    <p class="muted" id="syncStatus" style="margin-top:0"></p>
+    <div id="syncSetup">
+      <p class="hint" style="margin-top:0">Данные будут храниться в приватном (secret) GitHub Gist — так их увидит виджет Scriptable и другие ваши устройства.
+        Нужен токен с правом <b>gist</b>: <a href="https://github.com/settings/tokens/new?scopes=gist&amp;description=Spendings" target="_blank" rel="noopener">создать токен</a>
+        (в поле Expiration удобнее выбрать «No expiration»).</p>
+      <input class="inp" id="tokenInp" placeholder="ghp_…" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <div class="actions"><button type="button" class="btn primary" id="syncConnect">Подключить</button></div>
+    </div>
+    <div id="syncOn" hidden>
+      <div class="actions" style="flex-direction:column;margin-top:4px">
+        <button type="button" class="btn primary" id="widgetCopy">Скопировать скрипт виджета</button>
+        <button type="button" class="btn" id="syncNowBtn">Синхронизировать сейчас</button>
+        <button type="button" class="btn danger" id="syncDisconnect">Отключить синхронизацию</button>
+      </div>
+      <textarea class="inp" id="widgetText" rows="5" readonly hidden style="margin-top:10px;font-family:ui-monospace,monospace;font-size:12px"></textarea>
+    </div>
+
+    <h3>Данные</h3>
+    <p class="muted" style="margin-top:0">Без синхронизации данные хранятся только в этом браузере. Резервная копия поможет перенести их на другое устройство.</p>
+    <div class="actions" style="flex-direction:column;margin-top:0">
       <button type="button" class="btn" id="exportBtn">Скачать резервную копию (JSON)</button>
       <button type="button" class="btn" id="importBtn">Загрузить из файла</button>
       <button type="button" class="btn" id="csvBtn">Экспорт трат в CSV</button>
@@ -354,9 +379,12 @@
     return { categories: [], expenses: [] };
   }
   let db = load();
-  function save() {
+  // fromRemote: data just came from the cloud, so don't bump the timestamp or push it back
+  function save(fromRemote) {
+    if (!fromRemote) db.updatedAt = Date.now();
     try { localStorage.setItem(KEY, JSON.stringify(db)); }
     catch (e) { toast('Не удалось сохранить данные'); }
+    if (!fromRemote) schedulePush();
   }
 
   // ---------- formatting ----------
@@ -646,7 +674,190 @@
     db = { categories: [], expenses: [] }; save(); render(); $('setDlg').close();
   });
 
+  // ---------- cloud sync (GitHub Gist) ----------
+  const SYNC_KEY = 'spendings.sync';
+  const GH = 'https://api.github.com';
+  const GIST_FILE = 'spendings.json';
+  const GIST_DESC = 'Spendings data (используется приложением Spendings)';
+  let sync = null;
+  try { sync = JSON.parse(localStorage.getItem(SYNC_KEY) || 'null'); } catch (e) { sync = null; }
+  let syncState = { status: sync ? 'pending' : 'off', at: 0, error: '' };
+  let queue = Promise.resolve();
+  let pushTimer = null;
+  let widgetTemplate = null;
+
+  function storeSync() {
+    try { sync ? localStorage.setItem(SYNC_KEY, JSON.stringify(sync)) : localStorage.removeItem(SYNC_KEY); } catch (e) {}
+  }
+  async function gh(path, opts = {}, token = sync && sync.token) {
+    const res = await fetch(GH + path, {
+      ...opts,
+      cache: 'no-store',
+      headers: {
+        Authorization: 'Bearer ' + token,
+        Accept: 'application/vnd.github+json',
+        ...(opts.body ? { 'Content-Type': 'application/json' } : {}),
+      },
+    });
+    if (!res.ok) {
+      const err = new Error(res.status === 401 ? 'Токен не подходит или истёк' : res.status === 404 ? 'Gist не найден' : 'Ошибка GitHub ' + res.status);
+      err.status = res.status;
+      throw err;
+    }
+    return res.json();
+  }
+  async function pullRemote() {
+    const g = await gh('/gists/' + sync.gistId);
+    const f = g.files && g.files[GIST_FILE];
+    if (!f) return null;
+    const content = f.truncated ? await (await fetch(f.raw_url, { cache: 'no-store' })).text() : f.content;
+    const d = JSON.parse(content);
+    return Array.isArray(d.categories) && Array.isArray(d.expenses) ? d : null;
+  }
+  async function pushRemote() {
+    await gh('/gists/' + sync.gistId, {
+      method: 'PATCH',
+      body: JSON.stringify({ files: { [GIST_FILE]: { content: JSON.stringify(db) } } }),
+    });
+  }
+  function adopt(remote) {
+    db = { categories: remote.categories, expenses: remote.expenses, updatedAt: remote.updatedAt || Date.now() };
+    save(true);
+    render();
+    if (detCatId && $('detDlg').open) renderDetails();
+  }
+  function setSync(status, error) {
+    syncState = { status, at: status === 'ok' ? Date.now() : syncState.at, error: error || '' };
+    renderSync();
+  }
+  // run sync jobs one at a time
+  function enqueue(job) {
+    queue = queue.then(job).then(() => setSync('ok'), (e) => {
+      setSync('error', e.message);
+      if (e.status === 401) toast('Синхронизация: токен не подходит');
+    });
+    return queue;
+  }
+  function schedulePush() {
+    if (!sync) return;
+    setSync('pending');
+    clearTimeout(pushTimer);
+    pushTimer = setTimeout(() => enqueue(pushRemote), 800);
+  }
+  // newest copy wins
+  function reconcile() {
+    if (!sync) return;
+    clearTimeout(pushTimer);
+    return enqueue(async () => {
+      const remote = await pullRemote();
+      if (remote && (remote.updatedAt || 0) > (db.updatedAt || 0)) adopt(remote);
+      else if (!remote || (remote.updatedAt || 0) < (db.updatedAt || 0)) await pushRemote();
+    });
+  }
+  async function connect(token) {
+    const list = await gh('/gists?per_page=100', {}, token);
+    const found = list.find(g => g.description === GIST_DESC && g.files && g.files[GIST_FILE]);
+    if (found) {
+      sync = { token, gistId: found.id };
+      const remote = await pullRemote();
+      const hasLocal = db.categories.length > 0 || db.expenses.length > 0;
+      const hasRemote = remote && (remote.categories.length > 0 || remote.expenses.length > 0);
+      if (hasRemote && (!hasLocal || confirm('В облаке уже есть данные Spendings.\n\nОК — загрузить их на это устройство.\nОтмена — заменить их данными с этого устройства.'))) {
+        adopt(remote);
+      } else {
+        if (!db.updatedAt) db.updatedAt = Date.now();
+        save(true);
+        await pushRemote();
+      }
+    } else {
+      if (!db.updatedAt) { db.updatedAt = Date.now(); save(true); }
+      const created = await gh('/gists', {
+        method: 'POST',
+        body: JSON.stringify({ description: GIST_DESC, public: false, files: { [GIST_FILE]: { content: JSON.stringify(db) } } }),
+      }, token);
+      sync = { token, gistId: created.id };
+    }
+    storeSync();
+  }
+  function timeAgo(t) {
+    if (!t) return '';
+    const s = Math.round((Date.now() - t) / 1000);
+    if (s < 60) return 'только что';
+    if (s < 3600) return Math.round(s / 60) + ' мин назад';
+    return new Date(t).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+  }
+  function renderSync() {
+    $('syncSetup').hidden = !!sync;
+    $('syncOn').hidden = !sync;
+    const st = $('syncStatus');
+    if (!sync) st.textContent = 'Выключена.';
+    else if (syncState.status === 'ok') st.textContent = '✓ Синхронизировано ' + timeAgo(syncState.at);
+    else if (syncState.status === 'pending') st.textContent = 'Синхронизация…';
+    else st.innerHTML = '<span style="color:var(--danger)">Не синхронизировано: ' + esc(syncState.error) + '</span>';
+    const btn = $('settingsBtn');
+    let dot = btn.querySelector('.sync-dot');
+    if (sync && syncState.status === 'error') { if (!dot) btn.insertAdjacentHTML('beforeend', '<span class="sync-dot"></span>'); }
+    else if (dot) dot.remove();
+  }
+  function widgetScript() {
+    const appUrl = location.href.split('#')[0].split('?')[0].replace(/index\.html$/, '');
+    return widgetTemplate
+      .replace("const TOKEN = '';", 'const TOKEN = ' + JSON.stringify(sync.token) + ';')
+      .replace("const GIST_ID = '';", 'const GIST_ID = ' + JSON.stringify(sync.gistId) + ';')
+      .replace("const APP_URL = '';", 'const APP_URL = ' + JSON.stringify(appUrl) + ';');
+  }
+  function loadWidgetTemplate() {
+    if (widgetTemplate) return;
+    fetch('scriptable-widget.js', { cache: 'no-cache' }).then(r => r.ok ? r.text() : null).then(t => { if (t) widgetTemplate = t; }).catch(() => {});
+  }
+
+  $('syncConnect').addEventListener('click', async () => {
+    const token = $('tokenInp').value.trim();
+    if (!token) { $('tokenInp').focus(); return; }
+    const b = $('syncConnect');
+    b.disabled = true; b.textContent = 'Подключаю…';
+    try {
+      await connect(token);
+      $('tokenInp').value = '';
+      setSync('ok');
+      loadWidgetTemplate();
+      toast('Синхронизация включена');
+    } catch (e) {
+      sync = null;
+      toast(e.status === 401 ? 'Токен не подходит' : 'Не удалось подключиться: ' + e.message);
+    } finally {
+      b.disabled = false; b.textContent = 'Подключить';
+      renderSync();
+    }
+  });
+  $('syncNowBtn').addEventListener('click', () => { setSync('pending'); reconcile(); });
+  $('syncDisconnect').addEventListener('click', () => {
+    if (!confirm('Отключить синхронизацию на этом устройстве? Данные останутся и здесь, и в облаке.')) return;
+    sync = null; storeSync(); setSync('off');
+    $('widgetText').hidden = true;
+  });
+  $('widgetCopy').addEventListener('click', async () => {
+    if (!widgetTemplate) { loadWidgetTemplate(); toast('Скрипт ещё загружается, нажмите ещё раз'); return; }
+    const text = widgetScript();
+    const ta = $('widgetText');
+    try {
+      await navigator.clipboard.writeText(text);
+      toast('Скопировано — вставьте в новый скрипт в Scriptable');
+      ta.hidden = true;
+    } catch (e) {
+      // clipboard blocked: show the text so it can be copied by hand
+      ta.value = text; ta.hidden = false; ta.focus(); ta.select();
+      toast('Выделите текст и скопируйте вручную');
+    }
+  });
+  $('settingsBtn').addEventListener('click', () => { renderSync(); if (sync) loadWidgetTemplate(); });
+
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') reconcile(); });
+  window.addEventListener('online', () => reconcile());
+
   render();
+  renderSync();
+  reconcile();
 
   if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
