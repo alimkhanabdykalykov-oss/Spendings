@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#2f6fde"/>
+  <circle cx="256" cy="256" r="150" fill="#fff" fill-opacity=".18"/>
+  <clipPath id="c"><circle cx="256" cy="256" r="150"/></clipPath>
+  <path clip-path="url(#c)" fill="#fff" d="M80 290 Q 140 265 200 290 T 320 290 T 440 290 V 420 H 80 Z"/>
+  <text x="256" y="236" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="700" font-size="150" fill="#fff">£</text>
+</svg>
