@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -241,11 +241,11 @@
 <header class="wrap">
   <div class="top">
     <div class="month">
-      <button class="icon-btn" id="prev" aria-label="Предыдущий месяц">‹</button>
+      <button class="icon-btn" id="prev" aria-label="Previous month">‹</button>
       <h1 id="monthTitle"></h1>
-      <button class="icon-btn" id="next" aria-label="Следующий месяц">›</button>
+      <button class="icon-btn" id="next" aria-label="Next month">›</button>
     </div>
-    <button class="icon-btn" id="settingsBtn" aria-label="Настройки">⋯</button>
+    <button class="icon-btn" id="settingsBtn" aria-label="Settings">⋯</button>
   </div>
 
   <div class="summary" id="summary">
@@ -259,27 +259,27 @@
 
 <main class="wrap">
   <div class="grid" id="grid"></div>
-  <p class="empty-state" id="emptyState" hidden>Создайте первую категорию — например «Еда» с бюджетом £300.<br>Траты будут наполнять её кружок.</p>
+  <p class="empty-state" id="emptyState" hidden>Create your first category — for example “Groceries” with a £300 budget.<br>Each expense will fill up its bubble.</p>
 </main>
 
-<button class="fab" id="fab"><span style="font-size:20px;line-height:1">＋</span> Трата</button>
+<button class="fab" id="fab"><span style="font-size:20px;line-height:1">＋</span> Expense</button>
 <div class="toast" id="toast"></div>
 
 <!-- Add / edit expense -->
 <dialog id="expDlg">
   <form class="sheet" id="expForm" method="dialog">
-    <h2><span id="expTitle">Новая трата</span><button type="button" class="icon-btn x" data-close>✕</button></h2>
-    <label class="f" for="expAmount">Сумма</label>
+    <h2><span id="expTitle">New expense</span><button type="button" class="icon-btn x" data-close>✕</button></h2>
+    <label class="f" for="expAmount">Amount</label>
     <div class="money"><span>£</span><input class="inp" id="expAmount" inputmode="decimal" autocomplete="off" placeholder="0.00" required></div>
-    <label class="f">Категория</label>
+    <label class="f">Category</label>
     <div class="chips" id="expCats"></div>
-    <label class="f" for="expNote">Комментарий</label>
-    <input class="inp" id="expNote" placeholder="Например, Tesco" maxlength="80" autocomplete="off">
-    <label class="f" for="expDate">Дата</label>
+    <label class="f" for="expNote">Note</label>
+    <input class="inp" id="expNote" placeholder="e.g. Tesco" maxlength="80" autocomplete="off">
+    <label class="f" for="expDate">Date</label>
     <input class="inp" id="expDate" type="date" required>
     <div class="actions">
-      <button type="button" class="btn" data-close>Отмена</button>
-      <button type="submit" class="btn primary" id="expSave">Добавить</button>
+      <button type="button" class="btn" data-close>Cancel</button>
+      <button type="submit" class="btn primary" id="expSave">Add</button>
     </div>
   </form>
 </dialog>
@@ -287,18 +287,18 @@
 <!-- Add / edit category -->
 <dialog id="catDlg">
   <form class="sheet" id="catForm" method="dialog">
-    <h2><span id="catTitle">Новая категория</span><button type="button" class="icon-btn x" data-close>✕</button></h2>
-    <label class="f" for="catName">Название</label>
-    <input class="inp" id="catName" placeholder="Еда, Транспорт, Развлечения…" maxlength="30" required autocomplete="off">
-    <label class="f" for="catBudget">Бюджет на месяц</label>
+    <h2><span id="catTitle">New category</span><button type="button" class="icon-btn x" data-close>✕</button></h2>
+    <label class="f" for="catName">Name</label>
+    <input class="inp" id="catName" placeholder="Groceries, Transport, Fun…" maxlength="30" required autocomplete="off">
+    <label class="f" for="catBudget">Monthly budget</label>
     <div class="money"><span>£</span><input class="inp" id="catBudget" inputmode="decimal" placeholder="300" required autocomplete="off"></div>
-    <label class="f">Цвет</label>
+    <label class="f">Colour</label>
     <div class="swatches" id="catColors"></div>
-    <label class="f">Иконка</label>
+    <label class="f">Icon</label>
     <div class="emojis" id="catEmojis"></div>
     <div class="actions">
-      <button type="button" class="btn danger" id="catDelete" hidden>Удалить</button>
-      <button type="submit" class="btn primary" id="catSave">Создать</button>
+      <button type="button" class="btn danger" id="catDelete" hidden>Delete</button>
+      <button type="submit" class="btn primary" id="catSave">Create</button>
     </div>
   </form>
 </dialog>
@@ -308,16 +308,16 @@
   <div class="sheet">
     <h2><span id="detTitle"></span><button type="button" class="icon-btn x" data-close>✕</button></h2>
     <div class="stats">
-      <div class="stat"><small>Потрачено</small><b id="detSpent"></b></div>
-      <div class="stat"><small>Бюджет</small><b id="detBudget"></b></div>
-      <div class="stat"><small id="detLeftLbl">Осталось</small><b id="detLeft"></b></div>
+      <div class="stat"><small>Spent</small><b id="detSpent"></b></div>
+      <div class="stat"><small>Budget</small><b id="detBudget"></b></div>
+      <div class="stat"><small id="detLeftLbl">Left</small><b id="detLeft"></b></div>
     </div>
     <div class="bar" id="detBar"><i></i></div>
     <ul class="list" id="detList"></ul>
-    <p class="muted" id="detEmpty" hidden>В этом месяце трат нет.</p>
+    <p class="muted" id="detEmpty" hidden>No expenses this month.</p>
     <div class="actions">
-      <button type="button" class="btn" id="detEdit">Изменить</button>
-      <button type="button" class="btn primary" id="detAdd">＋ Трата</button>
+      <button type="button" class="btn" id="detEdit">Edit</button>
+      <button type="button" class="btn primary" id="detAdd">＋ Expense</button>
     </div>
   </div>
 </dialog>
@@ -325,33 +325,33 @@
 <!-- Settings -->
 <dialog id="setDlg">
   <div class="sheet">
-    <h2>Настройки<button type="button" class="icon-btn x" data-close>✕</button></h2>
+    <h2>Settings<button type="button" class="icon-btn x" data-close>✕</button></h2>
 
-    <h3>Синхронизация и виджет</h3>
+    <h3>Sync &amp; widget</h3>
     <p class="muted" id="syncStatus" style="margin-top:0"></p>
     <div id="syncSetup">
-      <p class="hint" style="margin-top:0">Данные будут храниться в приватном (secret) GitHub Gist — так их увидит виджет Scriptable и другие ваши устройства.
-        Нужен токен с правом <b>gist</b>: <a href="https://github.com/settings/tokens/new?scopes=gist&amp;description=Spendings" target="_blank" rel="noopener">создать токен</a>
-        (в поле Expiration удобнее выбрать «No expiration»).</p>
+      <p class="hint" style="margin-top:0">Your data will be stored in a secret GitHub Gist, so the Scriptable widget and your other devices can see it.
+        You need a token with the <b>gist</b> scope: <a href="https://github.com/settings/tokens/new?scopes=gist&amp;description=Spendings" target="_blank" rel="noopener">create a token</a>
+        (choosing “No expiration” is easiest).</p>
       <input class="inp" id="tokenInp" placeholder="ghp_…" autocomplete="off" autocapitalize="off" spellcheck="false">
-      <div class="actions"><button type="button" class="btn primary" id="syncConnect">Подключить</button></div>
+      <div class="actions"><button type="button" class="btn primary" id="syncConnect">Connect</button></div>
     </div>
     <div id="syncOn" hidden>
       <div class="actions" style="flex-direction:column;margin-top:4px">
-        <button type="button" class="btn primary" id="widgetCopy">Скопировать скрипт виджета</button>
-        <button type="button" class="btn" id="syncNowBtn">Синхронизировать сейчас</button>
-        <button type="button" class="btn danger" id="syncDisconnect">Отключить синхронизацию</button>
+        <button type="button" class="btn primary" id="widgetCopy">Copy widget script</button>
+        <button type="button" class="btn" id="syncNowBtn">Sync now</button>
+        <button type="button" class="btn danger" id="syncDisconnect">Turn off sync</button>
       </div>
       <textarea class="inp" id="widgetText" rows="5" readonly hidden style="margin-top:10px;font-family:ui-monospace,monospace;font-size:12px"></textarea>
     </div>
 
-    <h3>Данные</h3>
-    <p class="muted" style="margin-top:0">Без синхронизации данные хранятся только в этом браузере. Резервная копия поможет перенести их на другое устройство.</p>
+    <h3>Data</h3>
+    <p class="muted" style="margin-top:0">Without sync, data is stored only in this browser. Use a backup to move it to another device.</p>
     <div class="actions" style="flex-direction:column;margin-top:0">
-      <button type="button" class="btn" id="exportBtn">Скачать резервную копию (JSON)</button>
-      <button type="button" class="btn" id="importBtn">Загрузить из файла</button>
-      <button type="button" class="btn" id="csvBtn">Экспорт трат в CSV</button>
-      <button type="button" class="btn danger" id="resetBtn">Удалить все данные</button>
+      <button type="button" class="btn" id="exportBtn">Download backup (JSON)</button>
+      <button type="button" class="btn" id="importBtn">Restore from file</button>
+      <button type="button" class="btn" id="csvBtn">Export expenses to CSV</button>
+      <button type="button" class="btn danger" id="resetBtn">Delete all data</button>
     </div>
     <input type="file" id="importFile" accept="application/json,.json" hidden>
   </div>
@@ -383,7 +383,7 @@
   function save(fromRemote) {
     if (!fromRemote) db.updatedAt = Date.now();
     try { localStorage.setItem(KEY, JSON.stringify(db)); }
-    catch (e) { toast('Не удалось сохранить данные'); }
+    catch (e) { toast('Could not save data'); }
     if (!fromRemote) schedulePush();
   }
 
@@ -392,8 +392,8 @@
   const gbp0 = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 });
   const money = (n) => gbp.format(n);
   const moneyShort = (n) => Number.isInteger(n) || Math.abs(n) >= 1000 ? gbp0.format(Math.round(n)) : gbp.format(n);
-  const monthFmt = new Intl.DateTimeFormat('ru-RU', { month: 'long', year: 'numeric' });
-  const dayFmt = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'short' });
+  const monthFmt = new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric' });
+  const dayFmt = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short' });
   const parseAmount = (s) => {
     const n = parseFloat(String(s).replace(/[£\s]/g, '').replace(',', '.'));
     return Number.isFinite(n) ? Math.round(n * 100) / 100 : NaN;
@@ -418,18 +418,18 @@
   const waveSvg = (cls) => `<svg class="wave ${cls}" viewBox="0 0 200 10" preserveAspectRatio="none" aria-hidden="true"><path fill="currentColor" d="M0 5 Q 12.5 0 25 5 T 50 5 T 75 5 T 100 5 T 125 5 T 150 5 T 175 5 T 200 5 V10 H0 Z"/></svg>`;
 
   function render() {
-    $('monthTitle').textContent = monthFmt.format(new Date(view.y, view.m, 1)).replace(' г.', '');
+    $('monthTitle').textContent = monthFmt.format(new Date(view.y, view.m, 1));
     const exps = monthExpenses();
     const spent = spentBy(exps);
     const totalBudget = db.categories.reduce((s, c) => s + c.budget, 0);
     const totalSpent = exps.reduce((s, e) => s + e.amount, 0);
 
     $('sumSpent').textContent = money(totalSpent);
-    $('sumOf').textContent = totalBudget ? `из ${moneyShort(totalBudget)}` : '';
+    $('sumOf').textContent = totalBudget ? `of ${moneyShort(totalBudget)}` : '';
     const left = totalBudget - totalSpent;
     $('sumLeft').innerHTML = !totalBudget ? '' : left >= 0
-      ? `Осталось <b>${money(left)}</b>`
-      : `Перерасход <b style="color:var(--danger)">${money(-left)}</b>`;
+      ? `<b>${money(left)}</b> left`
+      : `<b style="color:var(--danger)">${money(-left)}</b> over budget`;
     const tp = totalBudget ? Math.min(100, totalSpent / totalBudget * 100) : 0;
     $('sumBar').querySelector('i').style.width = tp + '%';
     $('sumBar').classList.toggle('over', totalBudget > 0 && totalSpent > totalBudget);
@@ -448,9 +448,9 @@
           <div class="clip" data-h="${h}"><div class="label-in">${label}</div></div>
         </div>
         <div class="name">${esc(c.name)}</div>
-        <div class="amt ${over ? 'over' : ''}">${over ? 'перерасход ' + money(s - c.budget) : 'осталось ' + money(c.budget - s)}</div>
+        <div class="amt ${over ? 'over' : ''}">${over ? money(s - c.budget) + ' over' : money(c.budget - s) + ' left'}</div>
       </button>`;
-    }).join('') + `<button class="cat add" id="addCat" aria-label="Новая категория"><div class="bubble">＋</div><div class="name" style="color:var(--muted)">Категория</div></button>`;
+    }).join('') + `<button class="cat add" id="addCat" aria-label="New category"><div class="bubble">＋</div><div class="name" style="color:var(--muted)">Category</div></button>`;
 
     // size the inner label to the bubble so the white copy lines up with the dark one
     grid.querySelectorAll('.bubble').forEach(b => {
@@ -506,8 +506,8 @@
   function openExpense(catId, editId) {
     const ex = editId ? db.expenses.find(e => e.id === editId) : null;
     expState = { catId: ex ? ex.catId : (catId || (db.categories[0] && db.categories[0].id)), editId: ex ? ex.id : null };
-    $('expTitle').textContent = ex ? 'Изменить трату' : 'Новая трата';
-    $('expSave').textContent = ex ? 'Сохранить' : 'Добавить';
+    $('expTitle').textContent = ex ? 'Edit expense' : 'New expense';
+    $('expSave').textContent = ex ? 'Save' : 'Add';
     $('expAmount').value = ex ? ex.amount.toFixed(2) : '';
     $('expNote').value = ex ? ex.note : '';
     $('expDate').value = ex ? ex.date : defaultDate();
@@ -518,8 +518,8 @@
   $('expForm').addEventListener('submit', (e) => {
     e.preventDefault();
     const amount = parseAmount($('expAmount').value);
-    if (!(amount > 0)) { $('expAmount').focus(); toast('Введите сумму больше нуля'); return; }
-    if (!expState.catId) { toast('Выберите категорию'); return; }
+    if (!(amount > 0)) { $('expAmount').focus(); toast('Enter an amount above zero'); return; }
+    if (!expState.catId) { toast('Choose a category'); return; }
     const date = $('expDate').value || defaultDate();
     const note = $('expNote').value.trim();
     if (expState.editId) {
@@ -541,7 +541,7 @@
   // ---------- category dialog ----------
   let catState = { editId: null, color: COLORS[0], emoji: EMOJIS[0] };
   function renderCatPickers() {
-    $('catColors').innerHTML = COLORS.map(c => `<button type="button" class="sw ${c === catState.color ? 'on' : ''}" data-c="${c}" style="background:${c}" aria-label="Цвет ${c}"></button>`).join('');
+    $('catColors').innerHTML = COLORS.map(c => `<button type="button" class="sw ${c === catState.color ? 'on' : ''}" data-c="${c}" style="background:${c}" aria-label="Colour ${c}"></button>`).join('');
     $('catEmojis').innerHTML = EMOJIS.map(em => `<button type="button" class="em ${em === catState.emoji ? 'on' : ''}" data-e="${em}">${em}</button>`).join('');
   }
   $('catColors').addEventListener('click', (e) => { const b = e.target.closest('.sw'); if (!b) return; catState.color = b.dataset.c; renderCatPickers(); });
@@ -555,8 +555,8 @@
       color: c ? c.color : (COLORS.find(x => !usedColors.includes(x)) || COLORS[db.categories.length % COLORS.length]),
       emoji: c ? c.emoji : EMOJIS[0],
     };
-    $('catTitle').textContent = c ? 'Изменить категорию' : 'Новая категория';
-    $('catSave').textContent = c ? 'Сохранить' : 'Создать';
+    $('catTitle').textContent = c ? 'Edit category' : 'New category';
+    $('catSave').textContent = c ? 'Save' : 'Create';
     $('catDelete').hidden = !c;
     $('catName').value = c ? c.name : '';
     $('catBudget').value = c ? String(c.budget) : '';
@@ -569,7 +569,7 @@
     const name = $('catName').value.trim();
     const budget = parseAmount($('catBudget').value);
     if (!name) { $('catName').focus(); return; }
-    if (!(budget > 0)) { $('catBudget').focus(); toast('Укажите бюджет больше нуля'); return; }
+    if (!(budget > 0)) { $('catBudget').focus(); toast('Enter a budget above zero'); return; }
     if (catState.editId) {
       Object.assign(db.categories.find(c => c.id === catState.editId), { name, budget, color: catState.color, emoji: catState.emoji });
     } else {
@@ -582,7 +582,7 @@
     const id = catState.editId;
     const c = db.categories.find(c => c.id === id);
     const n = db.expenses.filter(e => e.catId === id).length;
-    if (!confirm(`Удалить категорию «${c.name}»${n ? ` и ${n} трат(ы) в ней` : ''}?`)) return;
+    if (!confirm(`Delete category “${c.name}”${n ? ` and its ${n} expense${n === 1 ? '' : 's'}` : ''}?`)) return;
     db.categories = db.categories.filter(c => c.id !== id);
     db.expenses = db.expenses.filter(e => e.catId !== id);
     save(); $('catDlg').close(); $('detDlg').close(); render();
@@ -600,7 +600,7 @@
     $('detSpent').textContent = money(s);
     $('detBudget').textContent = money(c.budget);
     const left = c.budget - s;
-    $('detLeftLbl').textContent = left >= 0 ? 'Осталось' : 'Перерасход';
+    $('detLeftLbl').textContent = left >= 0 ? 'Left' : 'Over budget';
     $('detLeft').textContent = money(Math.abs(left));
     $('detLeft').classList.toggle('neg', left < 0);
     const bar = $('detBar');
@@ -609,9 +609,9 @@
     bar.querySelector('i').style.background = left < 0 ? 'var(--danger)' : c.color;
     $('detList').innerHTML = exps.map(e => `<li data-id="${e.id}">
         <span class="d">${dayFmt.format(new Date(e.date + 'T12:00')).replace('.', '')}</span>
-        <span class="n">${e.note ? esc(e.note) : '<em>Без комментария</em>'}</span>
+        <span class="n">${e.note ? esc(e.note) : '<em>No note</em>'}</span>
         <span class="a">${money(e.amount)}</span>
-        <button class="del" type="button" aria-label="Удалить трату" data-del="${e.id}">✕</button>
+        <button class="del" type="button" aria-label="Delete expense" data-del="${e.id}">✕</button>
       </li>`).join('');
     $('detEmpty').hidden = exps.length > 0;
   }
@@ -622,7 +622,7 @@
       if (idx < 0) return;
       const [removed] = db.expenses.splice(idx, 1);
       save(); render(); renderDetails();
-      toast(`Удалено ${money(removed.amount)}`, 'Вернуть', () => { db.expenses.push(removed); save(); render(); if ($('detDlg').open) renderDetails(); });
+      toast(`Deleted ${money(removed.amount)}`, 'Undo', () => { db.expenses.push(removed); save(); render(); if ($('detDlg').open) renderDetails(); });
       return;
     }
     const li = e.target.closest('li');
@@ -653,7 +653,7 @@
   $('csvBtn').addEventListener('click', () => {
     const cats = Object.fromEntries(db.categories.map(c => [c.id, c.name]));
     const q = (s) => `"${String(s).replace(/"/g, '""')}"`;
-    const rows = [['Дата', 'Категория', 'Сумма (GBP)', 'Комментарий']]
+    const rows = [['Date', 'Category', 'Amount (GBP)', 'Note']]
       .concat([...db.expenses].sort((a, b) => a.date.localeCompare(b.date)).map(e => [e.date, cats[e.catId] || '', e.amount.toFixed(2), e.note]));
     download(`spendings-${isoDate(new Date())}.csv`, '﻿' + rows.map(r => r.map(q).join(',')).join('\n'), 'text/csv');
   });
@@ -663,14 +663,14 @@
     try {
       const d = JSON.parse(await f.text());
       if (!Array.isArray(d.categories) || !Array.isArray(d.expenses)) throw new Error('bad');
-      if (!confirm('Заменить текущие данные данными из файла?')) return;
+      if (!confirm('Replace your current data with the data from this file?')) return;
       db = { categories: d.categories, expenses: d.expenses };
-      save(); render(); $('setDlg').close(); toast('Данные загружены');
-    } catch (err) { toast('Не удалось прочитать файл'); }
+      save(); render(); $('setDlg').close(); toast('Data restored');
+    } catch (err) { toast('Could not read the file'); }
     finally { e.target.value = ''; }
   });
   $('resetBtn').addEventListener('click', () => {
-    if (!confirm('Удалить все категории и траты? Это нельзя отменить.')) return;
+    if (!confirm('Delete all categories and expenses? This cannot be undone.')) return;
     db = { categories: [], expenses: [] }; save(); render(); $('setDlg').close();
   });
 
@@ -678,7 +678,9 @@
   const SYNC_KEY = 'spendings.sync';
   const GH = 'https://api.github.com';
   const GIST_FILE = 'spendings.json';
-  const GIST_DESC = 'Spendings data (используется приложением Spendings)';
+  const GIST_DESC = 'Spendings data (used by the Spendings app)';
+  // description used by earlier versions, so already-synced gists are still found
+  const GIST_DESC_OLD = 'Spendings data (используется приложением Spendings)';
   let sync = null;
   try { sync = JSON.parse(localStorage.getItem(SYNC_KEY) || 'null'); } catch (e) { sync = null; }
   let syncState = { status: sync ? 'pending' : 'off', at: 0, error: '' };
@@ -700,7 +702,7 @@
       },
     });
     if (!res.ok) {
-      const err = new Error(res.status === 401 ? 'Токен не подходит или истёк' : res.status === 404 ? 'Gist не найден' : 'Ошибка GitHub ' + res.status);
+      const err = new Error(res.status === 401 ? 'Token is invalid or expired' : res.status === 404 ? 'Gist not found' : 'GitHub error ' + res.status);
       err.status = res.status;
       throw err;
     }
@@ -734,7 +736,7 @@
   function enqueue(job) {
     queue = queue.then(job).then(() => setSync('ok'), (e) => {
       setSync('error', e.message);
-      if (e.status === 401) toast('Синхронизация: токен не подходит');
+      if (e.status === 401) toast('Sync: token is invalid');
     });
     return queue;
   }
@@ -756,13 +758,13 @@
   }
   async function connect(token) {
     const list = await gh('/gists?per_page=100', {}, token);
-    const found = list.find(g => g.description === GIST_DESC && g.files && g.files[GIST_FILE]);
+    const found = list.find(g => (g.description === GIST_DESC || g.description === GIST_DESC_OLD) && g.files && g.files[GIST_FILE]);
     if (found) {
       sync = { token, gistId: found.id };
       const remote = await pullRemote();
       const hasLocal = db.categories.length > 0 || db.expenses.length > 0;
       const hasRemote = remote && (remote.categories.length > 0 || remote.expenses.length > 0);
-      if (hasRemote && (!hasLocal || confirm('В облаке уже есть данные Spendings.\n\nОК — загрузить их на это устройство.\nОтмена — заменить их данными с этого устройства.'))) {
+      if (hasRemote && (!hasLocal || confirm('There is already Spendings data in the cloud.\n\nOK — load it onto this device.\nCancel — replace it with the data from this device.'))) {
         adopt(remote);
       } else {
         if (!db.updatedAt) db.updatedAt = Date.now();
@@ -782,18 +784,18 @@
   function timeAgo(t) {
     if (!t) return '';
     const s = Math.round((Date.now() - t) / 1000);
-    if (s < 60) return 'только что';
-    if (s < 3600) return Math.round(s / 60) + ' мин назад';
-    return new Date(t).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    if (s < 60) return 'just now';
+    if (s < 3600) return Math.round(s / 60) + ' min ago';
+    return new Date(t).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
   }
   function renderSync() {
     $('syncSetup').hidden = !!sync;
     $('syncOn').hidden = !sync;
     const st = $('syncStatus');
-    if (!sync) st.textContent = 'Выключена.';
-    else if (syncState.status === 'ok') st.textContent = '✓ Синхронизировано ' + timeAgo(syncState.at);
-    else if (syncState.status === 'pending') st.textContent = 'Синхронизация…';
-    else st.innerHTML = '<span style="color:var(--danger)">Не синхронизировано: ' + esc(syncState.error) + '</span>';
+    if (!sync) st.textContent = 'Off.';
+    else if (syncState.status === 'ok') st.textContent = '✓ Synced ' + timeAgo(syncState.at);
+    else if (syncState.status === 'pending') st.textContent = 'Syncing…';
+    else st.innerHTML = '<span style="color:var(--danger)">Not synced: ' + esc(syncState.error) + '</span>';
     const btn = $('settingsBtn');
     let dot = btn.querySelector('.sync-dot');
     if (sync && syncState.status === 'error') { if (!dot) btn.insertAdjacentHTML('beforeend', '<span class="sync-dot"></span>'); }
@@ -815,39 +817,39 @@
     const token = $('tokenInp').value.trim();
     if (!token) { $('tokenInp').focus(); return; }
     const b = $('syncConnect');
-    b.disabled = true; b.textContent = 'Подключаю…';
+    b.disabled = true; b.textContent = 'Connecting…';
     try {
       await connect(token);
       $('tokenInp').value = '';
       setSync('ok');
       loadWidgetTemplate();
-      toast('Синхронизация включена');
+      toast('Sync is on');
     } catch (e) {
       sync = null;
-      toast(e.status === 401 ? 'Токен не подходит' : 'Не удалось подключиться: ' + e.message);
+      toast(e.status === 401 ? 'Invalid token' : 'Could not connect: ' + e.message);
     } finally {
-      b.disabled = false; b.textContent = 'Подключить';
+      b.disabled = false; b.textContent = 'Connect';
       renderSync();
     }
   });
   $('syncNowBtn').addEventListener('click', () => { setSync('pending'); reconcile(); });
   $('syncDisconnect').addEventListener('click', () => {
-    if (!confirm('Отключить синхронизацию на этом устройстве? Данные останутся и здесь, и в облаке.')) return;
+    if (!confirm('Turn off sync on this device? Your data stays both here and in the cloud.')) return;
     sync = null; storeSync(); setSync('off');
     $('widgetText').hidden = true;
   });
   $('widgetCopy').addEventListener('click', async () => {
-    if (!widgetTemplate) { loadWidgetTemplate(); toast('Скрипт ещё загружается, нажмите ещё раз'); return; }
+    if (!widgetTemplate) { loadWidgetTemplate(); toast('Script is still loading, tap again'); return; }
     const text = widgetScript();
     const ta = $('widgetText');
     try {
       await navigator.clipboard.writeText(text);
-      toast('Скопировано — вставьте в новый скрипт в Scriptable');
+      toast('Copied — paste it into a new script in Scriptable');
       ta.hidden = true;
     } catch (e) {
       // clipboard blocked: show the text so it can be copied by hand
       ta.value = text; ta.hidden = false; ta.focus(); ta.select();
-      toast('Выделите текст и скопируйте вручную');
+      toast('Select the text and copy it manually');
     }
   });
   $('settingsBtn').addEventListener('click', () => { renderSync(); if (sync) loadWidgetTemplate(); });

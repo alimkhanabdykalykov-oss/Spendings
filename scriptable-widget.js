@@ -2,23 +2,23 @@
 // These must be at the very top of the file. Do not edit.
 // icon-color: blue; icon-glyph: pound-sign;
 
-// Spendings — виджет для Scriptable.
-// Самый простой способ получить этот скрипт: в приложении Spendings
-// откройте «⋯» → «Скопировать скрипт виджета» — значения ниже подставятся сами.
-const TOKEN = '';   // GitHub-токен с правом gist
-const GIST_ID = ''; // ID gist-а с данными
-const APP_URL = ''; // ссылка на приложение (открывается по нажатию на виджет)
+// Spendings — Scriptable widget.
+// The easiest way to get this script: in the Spendings app open
+// “⋯” → “Copy widget script” — the values below are filled in for you.
+const TOKEN = '';   // GitHub token with the gist scope
+const GIST_ID = ''; // ID of the gist that holds the data
+const APP_URL = ''; // app link (opened when you tap the widget)
 
-// Параметр виджета (долгое нажатие → Изменить виджет → Parameter):
-// для маленького виджета можно указать название категории, например «Еда».
-// Без параметра маленький виджет показывает общий бюджет.
+// Widget parameter (long-press → Edit Widget → Parameter):
+// for the small widget you can enter a category name, e.g. “Groceries”.
+// Without a parameter the small widget shows the total budget.
 
 const FILE = 'spendings.json';
 const BG = new Color('#16171a');
 const SURFACE = new Color('#2a2c31');
 const MUTED = new Color('#9a9ca3');
 const DANGER = '#ef6b6b';
-const MONTHS = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 const money = (n) => '£' + (Math.abs(n) >= 1000 || Number.isInteger(n)
   ? Math.round(n).toLocaleString('en-GB')
@@ -37,7 +37,7 @@ async function loadData() {
     };
     const gist = await req.loadJSON();
     const file = gist && gist.files && gist.files[FILE];
-    if (!file) throw new Error(gist && gist.message ? gist.message : 'Файл с данными не найден');
+    if (!file) throw new Error(gist && gist.message ? gist.message : 'Data file not found');
     let content = file.content;
     if (file.truncated) content = await new Request(file.raw_url).loadString();
     const data = JSON.parse(content);
@@ -150,8 +150,8 @@ function text(stack, value, { size = 12, color = Color.white(), weight = 'regula
 function leftLine(stack, s, budget) {
   const left = budget - s;
   return left >= 0
-    ? { value: `осталось ${money(left)}`, color: MUTED }
-    : { value: `перерасход ${money(-left)}`, color: new Color(DANGER) };
+    ? { value: `${money(left)} left`, color: MUTED }
+    : { value: `${money(-left)} over`, color: new Color(DANGER) };
 }
 
 function buildSmall(w, m) {
@@ -185,7 +185,7 @@ function buildGrid(w, m, family) {
   text(header, m.month, { size: 15, weight: 'bold' });
   header.addSpacer();
   text(header, money(m.totalSpent), { size: 14, weight: 'bold', color: m.totalSpent > m.totalBudget ? new Color(DANGER) : Color.white() });
-  text(header, ` из ${money(m.totalBudget)}`, { size: 13, color: MUTED });
+  text(header, ` of ${money(m.totalBudget)}`, { size: 13, color: MUTED });
 
   if (family === 'large') {
     w.addSpacer(2);
@@ -223,7 +223,7 @@ function buildGrid(w, m, family) {
   }
   w.addSpacer();
   const hidden = m.cats.length - shown.length;
-  if (hidden > 0) text(w, `и ещё ${hidden}…`, { size: 10, color: MUTED }).rightAlignText();
+  if (hidden > 0) text(w, `+${hidden} more`, { size: 10, color: MUTED }).rightAlignText();
 }
 
 function message(w, title, body) {
@@ -244,21 +244,21 @@ async function main() {
     const { data, stale } = await loadData();
     const m = compute(data);
     if (!m.cats.length) {
-      message(w, 'Spendings', 'Создайте категории в приложении — они появятся здесь.');
+      message(w, 'Spendings', 'Create categories in the app and they will show up here.');
     } else if (family === 'small') {
       buildSmall(w, m);
     } else {
       buildGrid(w, m, family);
     }
     if (stale) {
-      const t = text(w, 'нет сети — старые данные', { size: 9, color: MUTED });
+      const t = text(w, 'offline — showing saved data', { size: 9, color: MUTED });
       t.centerAlignText();
     }
   } catch (e) {
     if (e.message === 'not-configured') {
-      message(w, 'Spendings', 'Откройте приложение → «⋯» → «Скопировать скрипт виджета» и вставьте его сюда.');
+      message(w, 'Spendings', 'Open the app → “⋯” → “Copy widget script” and paste it here.');
     } else {
-      message(w, 'Spendings', `Не удалось загрузить данные: ${e.message}`);
+      message(w, 'Spendings', `Could not load data: ${e.message}`);
     }
   }
 
